@@ -1,99 +1,118 @@
-# 🍞 Toast Catalog - Android Coding Challenge
+# Toast Catalog - Android Coding Challenge
 
-This is the solution for the **SumUp Mobile Coding Challenge** focused on building a Toast Catalog app in Android using modern development principles.
+This is the solution for the **SumUp Mobile Coding Challenge**, focused on building a Toast Catalog app for Android using modern development principles.
 
 ---
 
-## ✅ Challenge Tasks Completed
+## Challenge Tasks Completed
 
 ### Task 1: Connect App to Backend
-- ✅ Implemented `NetworkClient` using Retrofit with `HttpLoggingInterceptor`.
-- ✅ Used **BuildConfig** for flexible base URL management.
-- ✅ Injected dependencies via **Koin**.
-- ✅ Connected to `ItemsActivity` using MVVM and LiveData.
+- Implemented `NetworkClient` using Retrofit and `HttpLoggingInterceptor`
+- Used `BuildConfig` for flexible base URL management
+- Injected dependencies via Koin
+- Connected to `ItemsActivity` using MVVM and LiveData
 
 ### Task 2: Show “Last Sold” Date and Currency Format
-- ✅ `lastSold` is formatted with `SimpleDateFormat` (locale-aware).
-- ✅ `price` is displayed with correct currency using `NumberFormat.getCurrencyInstance()`.
+- `lastSold` is formatted using `SimpleDateFormat` with locale awareness
+- `price` is displayed using `NumberFormat.getCurrencyInstance()` for correct currency formatting
 
 ### Task 3: Add Tests to NetworkClient
-- ✅ Implemented unit tests for both success and failure scenarios.
-- ✅ Tests use JUnit and MockWebServer.
-
-### Task 4: Display Toast Icons
-- ✅ `setIcon()` displays a circular avatar containing the Toast ID.
-- ✅ Used Coil for image loading with lifecycle awareness.
+- Unit tests implemented for both success and failure scenarios
+- Used JUnit and MockWebServer
 
 ---
 
-## 🧰 Tech Stack
+## Features
 
-| Technology            | Purpose                                    |
-|-----------------------|--------------------------------------------|
-| Kotlin                | Programming language                       |
-| MVVM Architecture     | Separation of concerns                     |
-| Jetpack Navigation    | Single Activity + Fragment navigation      |
-| LiveData              | UI reactivity                              |
-| Coil                  | Image loading and caching                  |
-| Retrofit              | HTTP client for network calls              |
-| OkHttp Logging        | Debugging network requests                 |
-| Koin                  | Dependency injection                       |
-| JUnit                 | Unit testing network layer                 |
+- Displays a scrollable list of Toasts
+- Each item shows:
+  - Name
+  - Price with correct currency symbol
+  - Last sold date
+- Loading indicator (progress bar) while image loads
+- ViewModel uses `launchFromNetwork` extension for clean async handling
+- Network layer wraps responses using the `Result` sealed class
 
 ---
-## 📂 Project Structure
+
+## Tech Stack
+
+| Technology            | Purpose                                     |
+|-----------------------|---------------------------------------------|
+| Kotlin                | Programming language                        |
+| MVVM Architecture     | Separation of concerns                      |
+| Jetpack Navigation    | Single Activity with Fragment navigation    |
+| LiveData              | UI reactivity                               |
+| Coil                  | Image loading and caching                   |
+| Retrofit              | HTTP client for API calls                   |
+| OkHttp Logging        | Network call debugging                      |
+| Koin                  | Dependency injection                        |
+| JUnit                 | Unit testing                                |
+
+---
+
+## Project Structure
+
+## Project Structure
 
 ```plaintext
 toast-catalog/
 └── app/
+    ├── build.gradle.kts
     └── src/
         └── main/
-            └── java/com/sumup/challenge/toastcatalog/
-                ├── data/
-                │   ├── ItemRepository.kt
-                │   ├── ItemRepositoryImpl.kt
-                │   └── ItemResponse.kt
-                ├── di/
-                │   ├── AppModule.kt
-                │   └── NetworkModule.kt
-                ├── network/
-                │   ├── Networking.kt
-                │   └── Service.kt
-                ├── ui/
-                │   ├── ItemDetailFragment.kt
-                │   ├── ItemsActivity.kt
-                │   ├── ItemsAdapter.kt
-                │   ├── ItemsFragment.kt
-                │   └── ItemsViewModel.kt
-                ├── util/
-                │   ├── Result.kt
-                │   └── util.kt
-                └── ToastApplication.kt
+            ├── AndroidManifest.xml
+            ├── java/
+            │   └── com/sumup/challenge/toastcatalog/
+            │       ├── data/
+            │       │   ├── ItemRepository.kt
+            │       │   ├── ItemRepositoryImpl.kt
+            │       │   └── ItemResponse.kt
+            │       ├── di/
+            │       │   ├── AppModule.kt
+            │       │   └── NetworkModule.kt
+            │       ├── network/
+            │       │   ├── Networking.kt
+            │       │   └── Service.kt
+            │       ├── ui/
+            │       │   ├── adapter/
+            │       │   │   └── ItemsAdapter.kt
+            │       │   ├── view/
+            │       │   │   ├── ItemsActivity.kt
+            │       │   │   ├── ItemsFragment.kt
+            │       │   │   └── ItemDetailFragment.kt
+            │       │   └── viewmodel/
+            │       │       └── ItemsViewModel.kt
+            │       ├── util/
+            │       │   ├── Result.kt
+            │       │   └── util.kt
+            │       └── ToastApplication.kt
 
-## 🔁 Features
 
-- ✅ Displays a scrollable list of Toasts
-- ✅ Each item shows:
-  - Name
-  - Price with currency
-  - Last sold date
-  - Circular icon with ID
-- ✅ Loading indicator (progress bar) while image is loading
+## Key Classes
 
----
+### Result.kt
 
-## 🧪 Tests
+A sealed class used to represent UI and network response states:
 
-- `NetworkClient` test:
-  - ✅ Successful response
-  - ✅ 404 / error scenario
-- ViewModel injection tested via Koin
-- JSON loading covered with fixture validation
+```kotlin
+sealed class Result<out T> {
+    object Loading : Result<Nothing>()
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val exception: Throwable) : Result<Nothing>()
+}
 
----
-
-## ▶️ How to Run
-
-```bash
-git clone https://github.com/your-username/toast-catalog
-cd toast-catalog
+fun <T> ViewModel.launchFromNetwork(
+    request: suspend () -> T,
+    onResult: (Result<T>) -> Unit
+) {
+    viewModelScope.launch {
+        onResult(Result.Loading)
+        try {
+            val result = request()
+            onResult(Result.Success(result))
+        } catch (e: Exception) {
+            onResult(Result.Error(e))
+        }
+    }
+}
