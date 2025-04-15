@@ -41,12 +41,59 @@ This is the solution for the **SumUp Mobile Coding Challenge** focused on buildi
 | JUnit                 | Unit testing network layer                 |
 
 ---
+## 📂 Project Structure
 
-## 📸 UI Screenshot
+```plaintext
+toast-catalog/
+└── app/
+    └── src/
+        └── main/
+            └── java/com/sumup/challenge/toastcatalog/
+                ├── data/
+                │   ├── ItemRepository.kt
+                │   ├── ItemRepositoryImpl.kt
+                │   └── ItemResponse.kt
+                ├── di/
+                │   ├── AppModule.kt
+                │   └── NetworkModule.kt
+                ├── network/
+                │   ├── Networking.kt
+                │   └── Service.kt
+                ├── ui/
+                │   ├── ItemDetailFragment.kt
+                │   ├── ItemsActivity.kt
+                │   ├── ItemsAdapter.kt
+                │   ├── ItemsFragment.kt
+                │   └── ItemsViewModel.kt
+                ├── util/
+                │   ├── Result.kt
+                │   └── util.kt
+                └── ToastApplication.kt
 
-![App Screenshot](./art/Toast_Catalog.png)
+## 🔁 Features
+
+- ✅ Displays a scrollable list of Toasts
+- ✅ Each item shows:
+  - Name
+  - Price with currency
+  - Last sold date
+  - Circular icon with ID
+- ✅ Loading indicator (progress bar) while image is loading
 
 ---
 
-## 📂 Project Structure
+## 🧪 Tests
 
+- `NetworkClient` test:
+  - ✅ Successful response
+  - ✅ 404 / error scenario
+- ViewModel injection tested via Koin
+- JSON loading covered with fixture validation
+
+---
+
+## ▶️ How to Run
+
+```bash
+git clone https://github.com/your-username/toast-catalog
+cd toast-catalog
